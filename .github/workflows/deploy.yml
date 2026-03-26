@@ -1,0 +1,15 @@
+name: Deploy App
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger deploy webhook
+        run: |
+          curl -X POST "${{ secrets.DEPLOY_URL }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"port\":\"21098\",\"image\":\"vonguyenminhnhat/vonguyenminhnhat:latest\"}"
