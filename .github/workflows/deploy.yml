@@ -8,8 +8,21 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger deploy webhook
+      - name: Trien khai len DevOps Classroom
         run: |
-          curl -X POST "${{ secrets.DEPLOY_URL }}" \
-            -H "Content-Type: application/json" \
-            -d "{\"port\":\"21098\",\"image\":\"vonguyenminhnhat/vonguyenminhnhat:latest\"}"
+          REPO="vonguyenminhnhat/vonguyenminhnhat"
+          RESPONSE=$(curl -sS -w "\n%{http_code}" -X POST "${{ secrets.DEPLOY_URL }}?repo=$REPO&tag=latest&slot=7")
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          CODE=$(echo "$RESPONSE" | tail -n1)
+          echo "Webhook HTTP: $CODE"
+          if [ "$CODE" -lt 200 ] || [ "$CODE" -ge 300 ]; then
+            echo "Deploy that bai. Xem chi tiet trong nhom log ben duoi."
+            echo "::group::Chi tiet webhook JSON"
+            echo "$BODY" | python3 -m json.tool 2>/dev/null || echo "$BODY"
+            echo "::endgroup::"
+            exit 1
+          fi
+          echo "Deploy thanh cong."
+          echo "::group::Chi tiet webhook JSON"
+          echo "$BODY" | python3 -m json.tool 2>/dev/null || echo "$BODY"
+          echo "::endgroup::"
